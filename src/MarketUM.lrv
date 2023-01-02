@@ -1,0 +1,95 @@
+IMPORTS{
+import main.EndPoints;
+import main.MarketUMAuto;
+}
+
+GLOBAL {
+	VARIABLES {
+		noAlerts = 0;
+		int state = -1;
+	}
+	
+	EVENTS{
+		notLogged() = {*.accessMarketUm(driver)}
+		goodLogAttempt() = {*.goToLogInValid(driver)} %% logged as admin
+		badLogAttempt() = {*.goToLogInInvalid(driver)}
+		viewAlerts() = {*.goToAlerts(driver)}
+		viewHome() = {*.goToHome(driver)}
+		logOut() = {*.goToLogOut(driver)}
+
+		clearAlerts() = {*.deleteAlerts()}
+		postAlerts() = {*.postAlert(alert)}
+		checkAlerts() = {*.checkAlerts(data)}
+		checkAlertsAmount() = {*.checkAlertsAmount(data)}
+	}
+	
+	PROPERTY webAutomation{
+		STATES{
+			BAD{
+				unlockedPrematurely
+				WrongPage
+				BadAlerts
+				BadAlertAmount
+			}
+			NORMAL{
+				home
+				alerts
+				logged
+			}
+			STARTING{
+				unLogged
+			}
+		}
+		
+		TRANSITIONS{
+			unLogged -> unLogged [badLogAttempt\\;System.out.println("user has failed to log!");]
+			unLogged -> logged [goodLogAttempt\\;System.out.println("User has logged in!");]
+			
+			logged -> alerts [alerts\\;System.out.println("Went to alerts page!");]
+			logged -> home [home\\;System.out.println("Went to home page!");]
+			logged -> unLogged [logOut\\;System.out.println("User logged out successfully!");]
+			
+			alerts -> alerts [alerts\\;System.out.println("User went to alerts page successfully!");]
+			alerts -> home [home\\;System.out.println("User went to home page successfully!");]
+			alerts -> unLogged [logOut\\;System.out.println("User logged out successfully!");]
+			
+			home -> home [home\\;System.out.println("User went to home page successfully!");]
+			home -> alerts [alerts\\;System.out.println("User went to alerts page successfully!");]
+			home -> unLogged [logOut\\;System.out.println("User logged out successfully!");]
+
+		}
+	}
+
+		PROPERTY EndPoints{
+		STATES{
+			BAD{
+				%%notAdmin
+				badAlerts
+				badAlertAmount
+			}
+			NORMAL{
+				viewAlerts
+				postAlerts
+				checkAlerts
+				clearAlerts
+			}
+			STARTING{
+				loggedAdmin
+			}
+		}
+		
+		TRANSITIONS{			
+			%%loggedAdmin -> viewAlerts [\\;System.out.println("Viewed alerts!");]
+
+			viewAlerts -> postAlerts [postAlerts\ noAlerts>6\noAlerts++;System.out.println("Alert posted!");]
+			viewAlerts -> clearAlerts [clearAlerts\noAlerts>6\noAlerts=0;System.out.println("Cleared all alerts!");]
+			
+			postAlerts -> checkAlerts [checkAlerts\data==true\;System.out.println("Valid alert posted!");]
+			postAlerts -> checkAlerts [checkAlerts\data==false\;System.out.println("Invalid alert posted!");]
+
+			clearAlerts -> checkAlerts [checkAlertsAmount\noAlerts== 0\;System.out.println("Deleted all alerts successfully!");]
+			clearAlerts -> checkAlerts [checkAlertsAmount\noAlerts> 0\;System.out.println("Failed to delete all alerts!");]
+			clearAlerts -> unLogged [logOut\\;System.out.println("User logged out successfully!");]
+		}
+	}
+}

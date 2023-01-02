@@ -1,0 +1,17 @@
+digraph _logic_badLoginsProperty {
+rankdir=LR;
+node [shape = circle]; home alerts logged unLogged;
+node [shape = point]; _s_s;
+_s_s -> unLogged;
+alerts -> alerts [ label = "(1) alerts\\\\; System . out . println ( \" User went to alerts page successfully! \" ) ; "];
+alerts -> home [ label = "(2) home\\\\; System . out . println ( \" User went to home page successfully! \" ) ; "];
+alerts -> unLogged [ label = "(3) logOut\\\\; System . out . println ( \" User logged out successfully! \" ) ; "];
+logged -> alerts [ label = "(1) alerts\\\\; System . out . println ( \" Went to alerts page! \" ) ; "];
+logged -> home [ label = "(2) home\\\\; System . out . println ( \" Went to home page! \" ) ; "];
+logged -> unLogged [ label = "(3) logOut\\\\; System . out . println ( \" User logged out successfully! \" ) ; "];
+unLogged -> unLogged [ label = "(1) badLogAttempt\\\\; System . out . println ( \" user has failed to log! \" ) ; "];
+unLogged -> logged [ label = "(2) goodLogAttempt\\\\; System . out . println ( \" User has logged in! \" ) ; "];
+home -> home [ label = "(1) home\\\\; System . out . println ( \" User went to home page successfully! \" ) ; "];
+home -> alerts [ label = "(2) alerts\\\\; System . out . println ( \" User went to alerts page successfully! \" ) ; "];
+home -> unLogged [ label = "(3) logOut\\\\; System . out . println ( \" User logged out successfully! \" ) ; "];
+}

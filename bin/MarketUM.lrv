@@ -1,0 +1,57 @@
+IMPORTS{
+import main.EndPoints;
+import main.MarketUMAuto;
+}
+
+GLOBAL {
+%%	VARIABLES {
+%%		int badLogins = 0;
+%%		Clock lockedTime = new Clock();
+%%	}
+	
+	EVENTS{
+		notLogged() = {*.accessMarketUm(driver)}
+		goodLogAttempt() = {*.goToLogInValid(driver)}
+		badLogAttempt() = {*.goToLogInInvalid(driver)}
+		alerts() = {*.goToAlerts(driver)}
+		home() = {*.goToHome(driver)}
+		logOut() = {*.goToLogOut(driver)}
+	}
+	
+	PROPERTY badLoginsProperty{
+		STATES{
+%%			BAD{
+%%				unlockedPrematurely
+%%				WrongPage
+%%				BadAlerts
+%%				BadAlertAmount
+%%			}
+			NORMAL{
+				home
+				alerts
+				logged
+			}
+			STARTING{
+				unLogged
+			}
+		}
+		
+		TRANSITIONS{
+			unLogged -> unLogged [badLogAttempt\\;System.out.println("user has failed to log!");]
+			unLogged -> logged [goodLogAttempt\\;System.out.println("User has logged in!");]
+			
+			logged -> alerts [alerts\\;System.out.println("Went to alerts page!");]
+			logged -> home [home\\;System.out.println("Went to home page!");]
+			logged -> unLogged [logOut\\;System.out.println("User logged out successfully!");]
+			
+			alerts -> alerts [alerts\\;System.out.println("User went to alerts page successfully!");]
+			alerts -> home [home\\;System.out.println("User went to home page successfully!");]
+			alerts -> unLogged [logOut\\;System.out.println("User logged out successfully!");]
+			
+			home -> home [home\\;System.out.println("User went to home page successfully!");]
+			home -> alerts [alerts\\;System.out.println("User went to alerts page successfully!");]
+			home -> unLogged [logOut\\;System.out.println("User logged out successfully!");]
+
+		}
+	}
+}
