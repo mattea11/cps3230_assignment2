@@ -41,13 +41,53 @@ GLOBAL {
 		}
 		
 		TRANSITIONS{
-%%			unLogged -> unLogged [badLogAttempt\\state = -1;System.out.println("User has failed to log in!");]
-			unLogged -> logged [goodLogAttempt\\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 5)System.out.println("User has logged in! Current state:\t" + state);]
+			unLogged -> unLogged 
+				[badLogAttempt
+					\state == -1
+					\
+%%					state = -1;
+					System.out.println("User has failed to log in!");
+				]
 			
-			logged -> alertsPage [viewAlerts\\;dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 7)System.out.println("Went to alerts page! Current state:\t" + state);]
+			unLogged -> logged 
+				[goodLogAttempt
+					\
+					\
+					dataPulled = ep.getMarketUmData();
+					state = ep.getState(dataPulled);
+					if(state == 5)
+						System.out.println("User has logged in! Current state:\t" + state);
+				]
 			
-			alerts -> alerts [viewAlerts\\;dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 7)System.out.println("User went to alerts page successfully! Current state:\t" + state);]
-			alerts -> logOut [logOut\\;dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 6)System.out.println("User logged out successfully! Current state:\t" + state);;]
+			logged -> alertsPage 
+				[viewAlerts
+					\
+					\
+					dataPulled = ep.getMarketUmData(); 
+					state = ep.getState(dataPulled);
+					if(state == 7)
+						System.out.println("Went to alerts page! Current state:\t" + state);
+				]
+			
+			alerts -> alerts 
+				[viewAlerts
+					\
+					\
+					dataPulled = ep.getMarketUmData(); 
+					state = ep.getState(dataPulled);
+					if(state == 7)
+						System.out.println("User went to alerts page successfully! Current state:\t" + state);
+				]
+				
+			alerts -> logOut 
+				[logOut
+					\
+					\
+					dataPulled = ep.getMarketUmData(); 
+					state = ep.getState(dataPulled);
+					if(state == 6)
+						System.out.println("User logged out successfully! Current state:\t" + state);
+				]
 		}
 	}
 
@@ -69,20 +109,85 @@ GLOBAL {
 		}
 		
 		TRANSITIONS{	
-			unlogged -> loggedAdmin [goodLogAttempt\\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 5)System.out.println("Logged as admin! Current state:\t" + state);]		
+			unlogged -> loggedAdmin 
+				[goodLogAttempt
+					\
+					\
+					dataPulled = ep.getMarketUmData(); 
+					state = ep.getState(dataPulled);
+					if(state == 5)
+						System.out.println("Logged as admin! Current state:\t" + state);
+				]		
 			
-			loggedAdmin -> viewAlerts [viewAlerts\\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 7)System.out.println("Viewed alerts! Current state:\t" + state);]
+			loggedAdmin -> viewAlerts 
+				[viewAlerts
+					\
+					\
+					dataPulled = ep.getMarketUmData(); 
+					state = ep.getState(dataPulled);
+					if(state == 7)
+						System.out.println("Viewed alerts! Current state:\t" + state);
+				]
 
-			viewAlerts -> postAlerts [postAlerts\ noAlerts<6\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 0){System.out.println("Alert posted! Current state:\t" + state);alertNo++;}]
-			viewAlerts -> clearAlerts [clearAlerts\\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 1){System.out.println("Cleared all alerts! Current state:\t" + state); alertNo = 0;}]
+			viewAlerts -> postAlerts 
+			[postAlerts
+				\noAlerts<6
+				\dataPulled = ep.getMarketUmData();
+				state = ep.getState(dataPulled);
+				if(state == 0){
+					System.out.println("Alert posted! Current state:\t" + state);
+					alertNo++;
+				}
+			]
 			
-			postAlerts -> goodAlert [checkAlerts\data==true\System.out.println("Valid alert posted!"); ]
-			postAlerts -> badState [checkAlerts\data==false\System.out.println("Invalid alert posted!"); state = -1;]
+			viewAlerts -> clearAlerts 
+				[clearAlerts
+					\
+					\
+					dataPulled = ep.getMarketUmData(); 
+					state = ep.getState(dataPulled);
+					if(state == 1){
+						System.out.println("Cleared all alerts! Current state:\t" + state); 
+						alertNo = 0;
+					}
+				]
 			
-			goodAlert -> viewAlerts [viewAlerts\\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 7)System.out.println("Went to alerts page! Current state:\t" + state);] 
+			postAlerts -> goodAlert 
+				[checkAlerts
+					\data==true
+					\System.out.println("Valid alert posted!");
+				]
+			postAlerts -> badState 
+				[checkAlerts
+					\data==false
+					\System.out.println("Invalid alert posted!"); 
+					state = -1;
+				]
+			
+			goodAlert -> viewAlerts 
+				[viewAlerts
+					\
+					\dataPulled = ep.getMarketUmData(); 
+					state = ep.getState(dataPulled);
+					if(state == 7)
+						System.out.println("Went to alerts page! Current state:\t" + state);
+				] 
 
-			clearAlerts -> viewAlerts [viewAlerts\noAlerts == 0\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 7)System.out.println("Deleted all alerts successfully! Current state:\t" + state);]
-%%			clearAlerts -> badStat e [\noAlerts != 0\System.out.println("Failed to delete all alerts!"); state = -1;]
+			clearAlerts -> viewAlerts 
+				[viewAlerts
+					\noAlerts == 0
+					\dataPulled = ep.getMarketUmData(); 
+					state = ep.getState(dataPulled);
+					if(state == 7)
+						System.out.println("Deleted all alerts successfully! Current state:\t" + state);
+				]
+				
+%%			clearAlerts -> badState 
+%%				[
+%%					\noAlerts != 0
+%%					\System.out.println("Failed to delete all alerts!"); 
+%%					state = -1;
+%%				]
 
 		}
 	}

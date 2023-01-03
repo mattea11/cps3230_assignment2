@@ -1,70 +1,16 @@
 package main;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 public class EndPoints {
-
-	public List<String> createJsonObject(List<itemInfo> items, int itemType) throws JSONException, UnsupportedEncodingException{ //String title, String description, String url, String imageUrl, String price, String date
-        int act_price = 0;
-        JSONObject json = new JSONObject();
-        List<String> alert = new ArrayList<>();
-
-        try {// ensures that the json object created will keep the elements in the order they are added
-        Field changeMap = json.getClass().getDeclaredField("map");
-        changeMap.setAccessible(true);
-        changeMap.set(json, new LinkedHashMap<>());
-        changeMap.setAccessible(false);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-        System.out.println(e.getMessage());
-        }
-
-        for (int i = 0; i < items.size(); i++) { //create a jsonobject for every item passed in
-
-            if(itemType < 1 || itemType > 6 ||  items.get(i).image == "" || items.get(i).title == "" || items.get(i).description == "" || items.get(i).url == "" || items.get(i).price == ""){
-                throw new IllegalArgumentException("None of the item information should be null");
-            }else{
-
-                if(items.get(i).price.length() == 1){ // ensures the price passed is always 4 digits long 
-                    act_price = Integer.parseInt(items.get(i).price) * 1000;
-                } else if(items.get(i).price.length() == 2){
-                    act_price = Integer.parseInt(items.get(i).price) * 100;
-                } else if(items.get(i).price.length() == 3){
-                    act_price = Integer.parseInt(items.get(i).price) * 10;
-                } else{
-                    act_price = Integer.parseInt(items.get(i).price);
-                }
-
-                //create the json object
-                json.put("alertType", itemType);
-                json.put("heading", items.get(i).title);
-                json.put("description", items.get(i).description);
-                json.put("url", items.get(i).url);
-                json.put("imageUrl", items.get(i).image);
-                json.put("postedBy", "7f84a00a-eeac-47fa-b15c-ee7e7ff9378d");
-                json.put("priceInCents", act_price);
-
-                alert.add(json.toString());
-                System.out.println("Alert created:\t" + json.toString() + "\n\n");
-            }
-        }
-        return alert; // return a list of all the alerts generated
-    }
-
     public JSONArray getMarketUmData() throws IOException{
     	
     	String inline = "";
