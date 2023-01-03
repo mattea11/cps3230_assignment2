@@ -4,31 +4,35 @@ import main.MarketUMAuto;
 }
 
 GLOBAL {
-%%	VARIABLES {
-%%		int badLogins = 0;
-%%		Clock lockedTime = new Clock();
-%%	}
+	VARIABLES {
+		int noAlerts = 0;
+		int state = -1;
+		JSONArray dataPulled = null;
+	}
 	
 	EVENTS{
 		notLogged() = {*.accessMarketUm(driver)}
-		goodLogAttempt() = {*.goToLogInValid(driver)}
+		goodLogAttempt() = {*.goToLogInValid(driver)} %% logged as admin
 		badLogAttempt() = {*.goToLogInInvalid(driver)}
-		alerts() = {*.goToAlerts(driver)}
-		home() = {*.goToHome(driver)}
+		viewAlerts() = {*.goToAlerts(driver)}
+		viewHome() = {*.goToHome(driver)}
 		logOut() = {*.goToLogOut(driver)}
+
+		collectData() = {*.getMarketUmData()}
+		clearAlerts() = {*.deleteAlerts()}
+		postAlerts() = {*.postAlert(alert)}
+		checkAlerts() = {*.checkAlerts(data)} 
+		checkAlertsAmount() = {*.checkAlertsAmount(data)}
+		getState() = {*.getState(data)}
 	}
 	
-	PROPERTY badLoginsProperty{
+	PROPERTY webAutomation{
 		STATES{
-%%			BAD{
-%%				unlockedPrematurely
-%%				WrongPage
-%%				BadAlerts
-%%				BadAlertAmount
-%%			}
+			ACCEPTING{
+				logOut
+			}
 			NORMAL{
-				home
-				alerts
+				alertsPage
 				logged
 			}
 			STARTING{
@@ -37,20 +41,48 @@ GLOBAL {
 		}
 		
 		TRANSITIONS{
-			unLogged -> unLogged [badLogAttempt\\;System.out.println("user has failed to log!");]
-			unLogged -> logged [goodLogAttempt\\;System.out.println("User has logged in!");]
+%%			unLogged -> unLogged [badLogAttempt\\state = -1;System.out.println("User has failed to log in!");]
+			unLogged -> logged [goodLogAttempt\\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 5)System.out.println("User has logged in! Current state:\t" + state);]
 			
-			logged -> alerts [alerts\\;System.out.println("Went to alerts page!");]
-			logged -> home [home\\;System.out.println("Went to home page!");]
-			logged -> unLogged [logOut\\;System.out.println("User logged out successfully!");]
+			logged -> alertsPage [viewAlerts\\;dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 7)System.out.println("Went to alerts page! Current state:\t" + state);]
 			
-			alerts -> alerts [alerts\\;System.out.println("User went to alerts page successfully!");]
-			alerts -> home [home\\;System.out.println("User went to home page successfully!");]
-			alerts -> unLogged [logOut\\;System.out.println("User logged out successfully!");]
+			alerts -> alerts [viewAlerts\\;dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 7)System.out.println("User went to alerts page successfully! Current state:\t" + state);]
+			alerts -> logOut [logOut\\;dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 6)System.out.println("User logged out successfully! Current state:\t" + state);;]
+		}
+	}
+
+		PROPERTY EndPoints{
+		STATES{
+			BAD{
+				badState
+			}
+			NORMAL{
+				loggedAdmin
+				viewAlerts
+				postAlerts
+				goodAlerts
+				clearAlerts
+			}
+			STARTING{
+				unLogged
+			}
+		}
+		
+		TRANSITIONS{	
+			unlogged -> loggedAdmin [goodLogAttempt\\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 5)System.out.println("Logged as admin! Current state:\t" + state);]		
 			
-			home -> home [home\\;System.out.println("User went to home page successfully!");]
-			home -> alerts [alerts\\;System.out.println("User went to alerts page successfully!");]
-			home -> unLogged [logOut\\;System.out.println("User logged out successfully!");]
+			loggedAdmin -> viewAlerts [viewAlerts\\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 7)System.out.println("Viewed alerts! Current state:\t" + state);]
+
+			viewAlerts -> postAlerts [postAlerts\ noAlerts<6\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 0){System.out.println("Alert posted! Current state:\t" + state);alertNo++;}]
+			viewAlerts -> clearAlerts [clearAlerts\\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 1){System.out.println("Cleared all alerts! Current state:\t" + state); alertNo = 0;}]
+			
+			postAlerts -> goodAlert [checkAlerts\data==true\System.out.println("Valid alert posted!"); ]
+			postAlerts -> badState [checkAlerts\data==false\System.out.println("Invalid alert posted!"); state = -1;]
+			
+			goodAlert -> viewAlerts [viewAlerts\\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 7)System.out.println("Went to alerts page! Current state:\t" + state);] 
+
+			clearAlerts -> viewAlerts [viewAlerts\noAlerts == 0\dataPulled = ep.getMarketUmData(); state = ep.getState(dataPulled);if(state == 7)System.out.println("Deleted all alerts successfully! Current state:\t" + state);]
+%%			clearAlerts -> badStat e [\noAlerts != 0\System.out.println("Failed to delete all alerts!"); state = -1;]
 
 		}
 	}

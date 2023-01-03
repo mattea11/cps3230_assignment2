@@ -2,7 +2,12 @@ package modelBaseTest;
 
 public enum SystemStates {
 	NOT_LOGGED,
-	LOGGED,
-	ALERTS_PAGE,
-	HOME_PAGE
+	LOGGED, //as admin
+	LOG_OUT,
+	VIEW_ALERTS,
+ 
+	POST_ALERTS,
+	BAD_ALERT,
+	CLEAR_ALERTS,
+	CHECK_ALERTS
 }

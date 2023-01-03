@@ -37,17 +37,5 @@ public class MarketUMAuto {
         driver.findElement(By.xpath("//a[@href='/Alerts/List']")).click();         
         return driver;
     }
-
-    public WebDriver goToHome(WebDriver driver){
-        driver.findElement(By.xpath("//a[@href='/']")).click();
-        return driver;
-    }
-    
-//    view alerts check
-//    count alerts match posted
-
-    public void closeMarketUm(WebDriver driver){
-        driver.quit();
-        driver.close();
-    }
+ 
 }
