@@ -11,19 +11,16 @@ GLOBAL {
 	}
 	
 	EVENTS{
-		notLogged() = {*.accessMarketUm(driver)}
-		goodLogAttempt() = {*.goToLogInValid(driver)} %% logged as admin
-		badLogAttempt() = {*.goToLogInInvalid(driver)}
-		viewAlerts() = {*.goToAlerts(driver)}
-		viewHome() = {*.goToHome(driver)}
-		logOut() = {*.goToLogOut(driver)}
+		notLogged(WebDriver driver) = {*.accessMarketUm(driver)}
+		goodLogAttempt(WebDriver driver) = {*.goToLogInValid(driver)}
+		viewAlerts(WebDriver driver) = {*.goToAlerts(driver)}
+		logOut(WebDriver driver) = {*.goToLogOut(driver)}
 
 		collectData() = {*.getMarketUmData()}
 		clearAlerts() = {*.deleteAlerts()}
-		postAlerts() = {*.postAlert(alert)}
-		checkAlerts() = {*.checkAlerts(data)} 
-		checkAlertsAmount() = {*.checkAlertsAmount(data)}
-		getState() = {*.getState(data)}
+		postAlerts(String alert) = {*.postAlert(alert)}
+		checkAlerts(JSONArray data) = {*.checkAlerts(data)} 
+		getState(JSONArray data) = {*.getState(data)}
 	}
 	
 	PROPERTY webAutomation{
@@ -41,51 +38,49 @@ GLOBAL {
 		}
 		
 		TRANSITIONS{
-			unLogged -> unLogged 
-				[badLogAttempt
-					\state == -1
-					\
-%%					state = -1;
-					System.out.println("User has failed to log in!");
-				]
+%%			unLogged -> unLogged 
+%%				[badLogAttempt
+%%					\state == -1
+%%					\
+%%					System.out.println("User has failed to log in!");
+%%				]
 			
 			unLogged -> logged 
 				[goodLogAttempt
-					\
+					\state == -1
 					\
 					dataPulled = ep.getMarketUmData();
 					state = ep.getState(dataPulled);
-					if(state == 5)
-						System.out.println("User has logged in! Current state:\t" + state);
+					System.out.println("Attempting to log in");
 				]
 			
 			logged -> alertsPage 
 				[viewAlerts
-					\
+					\ state == 5
 					\
 					dataPulled = ep.getMarketUmData(); 
 					state = ep.getState(dataPulled);
-					if(state == 7)
-						System.out.println("Went to alerts page! Current state:\t" + state);
+%%					if(state == 5)
+						System.out.println("User logged in! Current state:\t" + state);
 				]
 			
-			alerts -> alerts 
+			alertsPage -> alertsPage 
 				[viewAlerts
-					\
+					\ state == 7
 					\
 					dataPulled = ep.getMarketUmData(); 
 					state = ep.getState(dataPulled);
-					if(state == 7)
+%%					if(state == 7)
 						System.out.println("User went to alerts page successfully! Current state:\t" + state);
 				]
 				
-			alerts -> logOut 
+			alertsPage -> logOut 
 				[logOut
 					\
 					\
 					dataPulled = ep.getMarketUmData(); 
 					state = ep.getState(dataPulled);
-					if(state == 6)
+					if(state == 7)
 						System.out.println("User logged out successfully! Current state:\t" + state);
 				]
 		}

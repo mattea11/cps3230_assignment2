@@ -1,7 +1,7 @@
 package modelBaseTest;
 
 public class TransitionSystem {
-	private boolean logged = false, alertsPage = false; 
+	private boolean logged = false, alertsPage = false, logOut = false; 
 	private boolean postAlert = false, checkAlert = false, deleteAlerts = false, goodAlert = false, badState = false;
 	
 	boolean isLogged(){
@@ -10,6 +10,10 @@ public class TransitionSystem {
 	
 	boolean isOnAlertsPage(){
 		return alertsPage;
+	}
+
+	boolean isLoggingOut(){
+		return logOut;
 	}
 	
 	boolean isPostingAlert(){
@@ -38,30 +42,37 @@ public class TransitionSystem {
 		}
 	}
 	
-	void invalidLogIn(){
-		if(!logged && !alertsPage){
-			// ma.accessMarketUm(driver);
-			// ma.goToLogInInvalid(driver);
-			logged = false;
-		}
-	}
-
 	void goToLogOut(){
-		if(logged){
+		if(logged && logOut){
 			alertsPage = false;
 			logged = false;
 		}
 	}
 		
 	void goToAlerts(){
-		if(logged){
+		if(logged && !logOut && deleteAlerts){
 			alertsPage = true;
+			deleteAlerts = true;
+		}
+		else if(logged && !logOut && postAlert){
+			alertsPage = true;
+			postAlert = true;
 		}
 	}
 	
 	void postAlert(){
 		if(logged && alertsPage && !checkAlert && !deleteAlerts){
 			postAlert = true;
+			badState = true;
+		}else if(logged && alertsPage && checkAlert && !deleteAlerts){
+			postAlert = true;
+			goodAlert = true;
+		}
+	}
+
+	void deleteAlert(){
+		if(logged && alertsPage && !postAlert && !checkAlert){
+			deleteAlerts = true;
 		}
 	}
 
@@ -72,14 +83,8 @@ public class TransitionSystem {
 	}
 	
     void checkBadState(){
-		if(logged && alertsPage && !checkAlert){
+		if(logged && !checkAlert || deleteAlerts){
 			badState = true;
-		}
-	}
-
-	void deleteAlert(){
-		if(logged && alertsPage && !postAlert && !checkAlert){
-			deleteAlerts = true;
 		}
 	}
 }

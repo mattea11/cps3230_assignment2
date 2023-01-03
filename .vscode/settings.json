@@ -1,0 +1,7 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "C:\\Junit\\junit-4.13.2.jar",
+        "c:\\Users\\matte\\Downloads\\modeljunit-2.5-jar-with-dependencies.jar"
+    ]
+}
